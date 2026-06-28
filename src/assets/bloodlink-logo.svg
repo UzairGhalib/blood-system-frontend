@@ -1,0 +1,76 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">BloodLink Logo Icon</title>
+  <desc id="desc">A red blood drop logo with a white medical cross and heart-link donation symbol.</desc>
+
+  <defs>
+    <linearGradient id="bloodGradient" x1="142" y1="80" x2="380" y2="462" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#EF4444"/>
+      <stop offset="0.45" stop-color="#C1121F"/>
+      <stop offset="1" stop-color="#780000"/>
+    </linearGradient>
+
+    <linearGradient id="highlightGradient" x1="210" y1="75" x2="374" y2="356" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.34"/>
+      <stop offset="0.55" stop-color="#FFFFFF" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <filter id="softShadow" x="56" y="34" width="400" height="468" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#780000" flood-opacity="0.18"/>
+    </filter>
+
+    <clipPath id="dropClip">
+      <path d="M256 38C216 112 151 170 117 238C64 345 139 464 256 477C373 464 448 345 395 238C361 170 296 112 256 38Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- Transparent canvas -->
+  <g filter="url(#softShadow)">
+    <!-- Main blood drop -->
+    <path d="M256 38C216 112 151 170 117 238C64 345 139 464 256 477C373 464 448 345 395 238C361 170 296 112 256 38Z" fill="url(#bloodGradient)"/>
+
+    <!-- Subtle inner highlight -->
+    <path d="M256 38C216 112 151 170 117 238C64 345 139 464 256 477C373 464 448 345 395 238C361 170 296 112 256 38Z" fill="url(#highlightGradient)" clip-path="url(#dropClip)"/>
+
+    <!-- Dark lower depth -->
+    <path d="M116 303C131 410 194 466 256 477C340 466 398 397 404 303C362 365 315 399 256 399C197 399 158 365 116 303Z" fill="#780000" opacity="0.16" clip-path="url(#dropClip)"/>
+  </g>
+
+  <!-- Medical cross -->
+  <g fill="#FFFFFF">
+    <rect x="238" y="128" width="36" height="92" rx="5"/>
+    <rect x="210" y="156" width="92" height="36" rx="5"/>
+  </g>
+
+  <!-- Heart / donation link symbol -->
+  <g clip-path="url(#dropClip)">
+    <path
+      d="M256 397C224 358 176 337 155 293C133 246 159 204 200 203C229 202 247 221 256 246C265 221 283 202 312 203C353 204 379 246 357 293C336 337 288 358 256 397Z"
+      stroke="#FFFFFF"
+      stroke-width="34"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      fill="none"
+    />
+
+    <!-- Inner link/drop curve -->
+    <path
+      d="M256 250C282 279 286 309 256 337C226 309 230 279 256 250Z"
+      stroke="#FFFFFF"
+      stroke-width="25"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      fill="none"
+    />
+
+    <!-- Lower flowing connection line -->
+    <path
+      d="M218 333C229 360 243 385 256 430C269 385 283 360 294 333"
+      stroke="#FFFFFF"
+      stroke-width="25"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      fill="none"
+    />
+  </g>
+</svg>
