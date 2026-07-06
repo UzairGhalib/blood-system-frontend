@@ -18,7 +18,7 @@ const navLinks = [
   { name: "Home", path: "/" },
   { name: "About", path: "/about" },
   { name: "Find Donors", path: "/find-donors" },
-  { name: "Blood Requests", path: "/blood-requests" },
+  { name: "Blood Requests", path: "/requesters" },
   { name: "How It Works", path: "/how-it-works" },
 ];
 

@@ -26,7 +26,7 @@ import footerImage from "../assets/footer-donor.png";
 const quickLinks = [
   { name: "Home", path: "/" },
   { name: "Find Donors", path: "/find-donors" },
-  { name: "Requests", path: "/requests" },
+  { name: "Requests", path: "/requesters" },
   { name: "How It Works", path: "/how-it-works" },
   { name: "Contact", path: "/contact" },
 ];
@@ -155,7 +155,7 @@ const Footer = () => {
                 </Link>
 
                 <Link
-                  to="/requests"
+                  to="/requesters"
                   className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 py-3 text-sm font-bold text-white transition hover:bg-white hover:text-[#C1121F]"
                 >
                   Create Request

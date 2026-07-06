@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { motion } from "framer-motion";
 import {
@@ -15,6 +16,8 @@ import {
   FaClock,
   FaLock,
 } from "react-icons/fa";
+
+const MotionLink = motion(Link);
 
 const floatingIcons = [
   {
@@ -228,14 +231,15 @@ function HeroSection() {
               <span className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
             </motion.button>
 
-            <motion.button
+            <MotionLink
+              to="/register"
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.96 }}
               className="px-7 py-3.5 rounded-2xl bg-white border border-[#E5E7EB] text-[#C1121F] font-bold shadow-sm hover:shadow-md hover:bg-[#FEF2F2] hover:border-[#C1121F] transition flex items-center justify-center gap-3"
             >
               <FaUserPlus />
               Donate Blood
-            </motion.button>
+            </MotionLink>
           </div>
 
           {/* Short professional trust row */}

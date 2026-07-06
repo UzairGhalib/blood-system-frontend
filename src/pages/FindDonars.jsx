@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaTint,
@@ -243,6 +244,8 @@ const floatingIcons = [
   { icon: FaHandHoldingMedical, className: "right-[30%] top-[8%]", delay: 2.8 },
 ];
 
+const MotionLink = motion(Link);
+
 const containerVariants = {
   hidden: {},
   visible: {
@@ -439,8 +442,9 @@ const DonorDirectorySection = () => {
                 Filter
               </motion.button>
 
-              <motion.a
-                href="/requests"
+              <MotionLink
+                to="/requesters"
+                state={{ donor: filteredDonors[0] }}
                 whileHover={{ y: -2 }}
                 whileTap={{ scale: 0.97 }}
                 className="relative flex h-12 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-[#C1121F] px-5 text-sm font-bold text-white shadow-lg shadow-[#C1121F]/25 transition before:absolute before:inset-0 before:-translate-x-full before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:transition-transform before:duration-700 hover:bg-[#780000] hover:before:translate-x-full"
@@ -449,7 +453,7 @@ const DonorDirectorySection = () => {
                 <span className="relative z-10 whitespace-nowrap">
                   Create Request
                 </span>
-              </motion.a>
+              </MotionLink>
             </div>
           </div>
 
@@ -663,8 +667,9 @@ const DonorCard = ({ donor }) => {
           <span className="min-w-0 truncate whitespace-nowrap">WhatsApp</span>
         </motion.a>
 
-        <motion.a
-          href="/requests"
+        <MotionLink
+          to="/requesters"
+          state={{ donor }}
           whileHover={{ y: -2 }}
           whileTap={{ scale: 0.96 }}
           className="relative flex min-h-[42px] items-center justify-center gap-1.5 overflow-hidden rounded-2xl bg-[#C1121F] px-2.5 py-2.5 text-[11px] font-extrabold text-white shadow-lg shadow-[#C1121F]/25 transition before:absolute before:inset-0 before:-translate-x-full before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:transition-transform before:duration-700 hover:bg-[#780000] hover:before:translate-x-full sm:col-span-3 sm:gap-2 sm:px-4 sm:py-3 sm:text-sm"
@@ -673,7 +678,7 @@ const DonorCard = ({ donor }) => {
           <span className="relative z-10 truncate whitespace-nowrap">
             Request Blood
           </span>
-        </motion.a>
+        </MotionLink>
       </div>
     </motion.article>
   );
