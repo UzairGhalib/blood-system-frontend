@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -18,7 +18,6 @@ import {
   FaUserInjured,
   FaWhatsapp,
   FaArrowLeft,
-  FaPlus,
 } from "react-icons/fa";
 
 const STORAGE_KEY = "bloodlinkRequests";
@@ -346,14 +345,10 @@ const getStatusClass = (status) => {
 };
 
 const RequestsPage = () => {
-  const [storedRequests, setStoredRequests] = useState([]);
+  const [storedRequests] = useState(() => getStoredRequests());
   const [searchText, setSearchText] = useState("");
   const [selectedBloodGroup, setSelectedBloodGroup] = useState("All");
   const [selectedUrgency, setSelectedUrgency] = useState("All");
-
-  useEffect(() => {
-    setStoredRequests(getStoredRequests());
-  }, []);
 
   const allRequests = useMemo(() => {
     return [...storedRequests, ...dummyRequests];

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -114,6 +115,7 @@ const formatDate = (value) => {
 const RegistrationPage = () => {
   const [activeRole, setActiveRole] = useState("donor");
   const [successMessage, setSuccessMessage] = useState("");
+  const navigate = useNavigate();
 
   const isDonor = activeRole === "donor";
 
@@ -177,6 +179,16 @@ const RegistrationPage = () => {
           JSON.stringify([newDonor, ...oldDonors])
         );
 
+        localStorage.setItem(
+          "bloodlinkCurrentUser",
+          JSON.stringify({
+            id: newDonor.id,
+            role: "donor",
+            email: values.phone,
+            loggedInAt: now.toISOString(),
+          })
+        );
+
         const submissionRecord = {
           id: Date.now(),
           page: "registration",
@@ -203,6 +215,8 @@ const RegistrationPage = () => {
           "bloodlinkFormSubmissions",
           JSON.stringify(updatedSubmissions)
         );
+
+        window.dispatchEvent(new Event("bloodlink-auth-change"));
 
         console.groupCollapsed("BloodLink Registration Submission");
         console.table([submissionRecord]);
@@ -239,6 +253,16 @@ const RegistrationPage = () => {
           JSON.stringify([newRequest, ...oldRequests])
         );
 
+        localStorage.setItem(
+          "bloodlinkCurrentUser",
+          JSON.stringify({
+            id: newRequest.id,
+            role: "requester",
+            email: values.phone,
+            loggedInAt: now.toISOString(),
+          })
+        );
+
         const submissionRecord = {
           id: Date.now(),
           page: "registration",
@@ -270,6 +294,8 @@ const RegistrationPage = () => {
           JSON.stringify(updatedSubmissions)
         );
 
+        window.dispatchEvent(new Event("bloodlink-auth-change"));
+
         console.groupCollapsed("BloodLink Registration Submission");
         console.table([submissionRecord]);
         console.log("Stored registration form data:", submissionRecord);
@@ -280,6 +306,10 @@ const RegistrationPage = () => {
 
       actions.resetForm({
         values: isDonor ? donorInitialValues : requesterInitialValues,
+      });
+
+      navigate(isDonor ? "/donor-dashboard" : "/requester-dashboard", {
+        replace: true,
       });
 
       actions.setSubmitting(false);

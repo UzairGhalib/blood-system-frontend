@@ -1,4 +1,3 @@
-import React from 'react'
 import Header from './Header.jsx'
 import Doners from './Doners.jsx'
 import AboutSection from './AboutSection.jsx'

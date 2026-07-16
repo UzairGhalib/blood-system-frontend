@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -443,7 +443,7 @@ const DonorDirectorySection = () => {
               </motion.button>
 
               <MotionLink
-                to="/requesters"
+                to="/blood-requests"
                 state={{ donor: filteredDonors[0] }}
                 whileHover={{ y: -2 }}
                 whileTap={{ scale: 0.97 }}
@@ -668,7 +668,7 @@ const DonorCard = ({ donor }) => {
         </motion.a>
 
         <MotionLink
-          to="/requesters"
+          to="/blood-requests"
           state={{ donor }}
           whileHover={{ y: -2 }}
           whileTap={{ scale: 0.96 }}

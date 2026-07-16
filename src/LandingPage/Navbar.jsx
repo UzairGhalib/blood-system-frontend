@@ -1,15 +1,16 @@
-import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaBars,
   FaTimes,
   FaUserPlus,
   FaSignInAlt,
-  FaChevronDown,
   FaHeartbeat,
   FaClipboardList,
   FaHospital,
+  FaSignOutAlt,
+  FaTint,
 } from "react-icons/fa";
 
 import logo from "../assets/bloodlink-logo.svg";
@@ -18,24 +19,63 @@ const navLinks = [
   { name: "Home", path: "/" },
   { name: "About", path: "/about" },
   { name: "Find Donors", path: "/find-donors" },
-  { name: "Blood Requests", path: "/requesters" },
+  { name: "Blood Requests", path: "/blood-requests" },
   { name: "How It Works", path: "/how-it-works" },
 ];
 
-const dashboardLinks = [
-  {
-    name: "Donor",
-    path: "/donor-dashboard",
-    desc: "Manage availability",
-    icon: <FaHeartbeat />,
-  },
-  {
-    name: "Requester",
-    path: "/requester-dashboard",
-    desc: "Manage blood requests",
-    icon: <FaClipboardList />,
-  },
-];
+const normalizeRole = (role = "") => {
+  const value = String(role).toLowerCase().trim();
+
+  if (value === "donar" || value === "donor") return "donor";
+  if (value === "requester" || value === "requestor") return "requester";
+
+  return "";
+};
+
+const getCurrentUser = () => {
+  try {
+    const savedUser = localStorage.getItem("bloodlinkCurrentUser");
+    return savedUser ? JSON.parse(savedUser) : null;
+  } catch (error) {
+    console.warn("BloodLink user not loaded:", error);
+    return null;
+  }
+};
+
+const getDashboardData = (user) => {
+  const role = normalizeRole(user?.role);
+
+  if (role === "donor") {
+    return {
+      role,
+      name: "Donor Dashboard",
+      shortName: "Donor",
+      path: "/donor-dashboard",
+      desc: "View blood requests",
+      icon: <FaHeartbeat />,
+    };
+  }
+
+  if (role === "requester") {
+    return {
+      role,
+      name: "Requester Dashboard",
+      shortName: "Requester",
+      path: "/requester-dashboard",
+      desc: "Find blood donors",
+      icon: <FaClipboardList />,
+    };
+  }
+
+  return {
+    role: "",
+    name: "Dashboard",
+    shortName: "Dashboard",
+    path: "/login",
+    desc: "Login required",
+    icon: <FaHospital />,
+  };
+};
 
 function DesktopNavLink({ link }) {
   return (
@@ -44,8 +84,8 @@ function DesktopNavLink({ link }) {
       className={({ isActive }) =>
         `group relative overflow-hidden rounded-2xl px-4 py-2.5 text-sm font-bold transition-all duration-300 ${
           isActive
-            ? "text-[#C1121F] bg-[#FEF2F2] shadow-sm"
-            : "text-[#6B7280] hover:text-[#C1121F] hover:bg-[#FEF2F2]/80"
+            ? "bg-[#FEF2F2] text-[#C1121F] shadow-sm"
+            : "text-[#6B7280] hover:bg-[#FEF2F2]/80 hover:text-[#C1121F]"
         }`
       }
     >
@@ -59,23 +99,21 @@ function DesktopNavLink({ link }) {
             }`}
           />
 
-          <span className="relative z-10 flex items-center">
-            {link.name}
-          </span>
+          <span className="relative z-10 flex items-center">{link.name}</span>
 
           <span
-            className={`absolute left-4 right-4 bottom-1 h-0.5 rounded-full bg-[#C1121F] transition-all duration-300 ${
+            className={`absolute bottom-1 left-4 right-4 h-0.5 rounded-full bg-[#C1121F] transition-all duration-300 ${
               isActive
-                ? "opacity-100 scale-x-100"
-                : "opacity-0 scale-x-0 group-hover:opacity-100 group-hover:scale-x-100"
+                ? "scale-x-100 opacity-100"
+                : "scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100"
             }`}
           />
 
           <span
-            className={`absolute top-1.5 right-2 w-1.5 h-1.5 rounded-full bg-[#C1121F] transition-all duration-300 ${
+            className={`absolute right-2 top-1.5 h-1.5 w-1.5 rounded-full bg-[#C1121F] transition-all duration-300 ${
               isActive
-                ? "opacity-100 scale-100"
-                : "opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100"
+                ? "scale-100 opacity-100"
+                : "scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"
             }`}
           />
         </>
@@ -92,58 +130,101 @@ function MobileNavLink({ link, onClick }) {
       className={({ isActive }) =>
         `group flex items-center justify-between rounded-2xl px-4 py-3.5 font-bold transition-all duration-300 ${
           isActive
-            ? "bg-[#FEF2F2] text-[#C1121F] border border-red-100 shadow-sm"
+            ? "border border-red-100 bg-[#FEF2F2] text-[#C1121F] shadow-sm"
             : "text-[#6B7280] hover:bg-[#FEF2F2] hover:text-[#C1121F]"
         }`
       }
     >
-      <span className="flex items-center gap-3">
-        {link.name}
-      </span>
-
-      <span className="w-2 h-2 rounded-full bg-[#C1121F] opacity-0 group-hover:opacity-100 transition" />
+      <span>{link.name}</span>
+      <span className="h-2 w-2 rounded-full bg-[#C1121F] opacity-0 transition group-hover:opacity-100" />
     </NavLink>
   );
 }
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [dashboardOpen, setDashboardOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  const navigate = useNavigate();
+  const dashboardData = useMemo(
+    () => getDashboardData(currentUser),
+    [currentUser]
+  );
+
+  const refreshUser = () => {
+    setCurrentUser(getCurrentUser());
+  };
+
+  useEffect(() => {
+    const handleStorageChange = () => refreshUser();
+    const handleAuthChange = () => refreshUser();
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("bloodlink-auth-change", handleAuthChange);
+    window.addEventListener("focus", handleAuthChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("bloodlink-auth-change", handleAuthChange);
+      window.removeEventListener("focus", handleAuthChange);
+    };
+  }, []);
+
+  const handleDashboardClick = () => {
+    setIsOpen(false);
+
+    if (!currentUser) {
+      navigate("/login");
+      return;
+    }
+
+    navigate(dashboardData.path);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("bloodlinkCurrentUser");
+
+    window.dispatchEvent(new Event("bloodlink-auth-change"));
+
+    setCurrentUser(null);
+    setIsOpen(false);
+    navigate("/");
+  };
 
   return (
     <nav className="sticky top-0 z-50 border-b border-[#E5E7EB]/80 bg-[#FCFCFD]/75 backdrop-blur-2xl">
-      {/* soft top glow */}
+      {/* Premium Navbar Background */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#FEF2F2]/80 via-white/40 to-[#E0F2FE]/50" />
       <div className="pointer-events-none absolute -top-16 left-1/2 h-28 w-[34rem] -translate-x-1/2 rounded-full bg-[#C1121F]/10 blur-3xl" />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-5 lg:px-6">
-        <div className="h-20 flex items-center justify-between gap-4">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-5 lg:px-6">
+        <div className="flex h-20 items-center justify-between gap-4">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 group shrink-0">
+          <Link to="/" className="group flex shrink-0 items-center gap-3">
             <motion.div
               whileHover={{ rotate: 6, scale: 1.08 }}
               whileTap={{ scale: 0.95 }}
               className="relative"
             >
-              <span className="absolute inset-0 rounded-3xl bg-[#C1121F]/25 blur-xl opacity-70 group-hover:opacity-100 transition" />
+              <span className="absolute inset-0 rounded-3xl bg-[#C1121F]/25 opacity-70 blur-xl transition group-hover:opacity-100" />
 
-              <div className="relative w-14 h-14 rounded-3xl bg-white border border-[#E5E7EB] shadow-lg shadow-red-100/60 flex items-center justify-center overflow-hidden">
+              <div className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-3xl border border-[#E5E7EB] bg-white shadow-lg shadow-red-100/60">
                 <img
                   src={logo}
                   alt="BloodLink Logo"
-                  className="w-11 h-11 object-contain"
+                  className="h-11 w-11 object-contain"
                 />
               </div>
             </motion.div>
 
             <div className="leading-none">
-              <h1 className="text-2xl md:text-[28px] font-black tracking-tight">
+              <h1 className="text-2xl font-black tracking-tight md:text-[28px]">
                 <span className="text-[#C1121F]">Blood</span>
                 <span className="text-[#111827]">Link</span>
               </h1>
 
-              <div className="mt-1 hidden sm:flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#16A34A]" />
+              <div className="mt-1 hidden items-center gap-1.5 sm:flex">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#16A34A]" />
                 <p className="text-xs font-semibold text-[#6B7280]">
                   Smart Blood Donation System
                 </p>
@@ -152,117 +233,90 @@ function Navbar() {
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden xl:flex items-center gap-1.5 rounded-3xl border border-[#E5E7EB] bg-white/75 backdrop-blur-xl px-2 py-2 shadow-sm">
+          <div className="hidden items-center gap-1.5 rounded-3xl border border-[#E5E7EB] bg-white/75 px-2 py-2 shadow-sm backdrop-blur-xl xl:flex">
             {navLinks.map((link) => (
               <DesktopNavLink key={link.path} link={link} />
             ))}
 
-            {/* Dashboard Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setDashboardOpen(!dashboardOpen)}
-                onBlur={() => setTimeout(() => setDashboardOpen(false), 160)}
-                className={`group relative overflow-hidden rounded-2xl px-4 py-2.5 text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
-                  dashboardOpen
-                    ? "bg-[#FEF2F2] text-[#C1121F]"
-                    : "text-[#6B7280] hover:text-[#C1121F] hover:bg-[#FEF2F2]"
-                }`}
+            {currentUser && (
+              <NavLink
+                to={dashboardData.path}
+                className={({ isActive }) =>
+                  `group relative flex items-center gap-2 overflow-hidden rounded-2xl px-4 py-2.5 text-sm font-bold transition-all duration-300 ${
+                    isActive
+                      ? "bg-[#FEF2F2] text-[#C1121F] shadow-sm"
+                      : "text-[#6B7280] hover:bg-[#FEF2F2]/80 hover:text-[#C1121F]"
+                  }`
+                }
               >
-                <FaHospital className="text-xs group-hover:scale-110 transition" />
-                Dashboard
-                <FaChevronDown
-                  className={`text-xs transition duration-300 ${
-                    dashboardOpen ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-
-              <AnimatePresence>
-                {dashboardOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 14, scale: 0.96 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 14, scale: 0.96 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute right-0 mt-4 w-80 overflow-hidden rounded-3xl border border-[#E5E7EB] bg-white/95 backdrop-blur-2xl shadow-2xl shadow-red-100"
-                  >
-                    <div className="p-4 bg-gradient-to-br from-[#FEF2F2] to-white border-b border-[#E5E7EB]">
-                      <p className="text-xs uppercase tracking-wider font-black text-[#C1121F]">
-                        BloodLink Dashboards
-                      </p>
-                      <p className="mt-1 text-sm text-[#6B7280]">
-                        Manage donor and requester workflows.
-                      </p>
-                    </div>
-
-                    <div className="p-3 space-y-2">
-                      {dashboardLinks.map((item) => (
-                        <NavLink
-                          key={item.path}
-                          to={item.path}
-                          onClick={() => setDashboardOpen(false)}
-                          className={({ isActive }) =>
-                            `group flex items-center gap-3 rounded-2xl px-4 py-3 transition-all duration-300 ${
-                              isActive
-                                ? "bg-[#FEF2F2] text-[#C1121F]"
-                                : "text-[#6B7280] hover:bg-[#FEF2F2] hover:text-[#C1121F]"
-                            }`
-                          }
-                        >
-                          <span className="w-11 h-11 rounded-2xl bg-[#FEF2F2] text-[#C1121F] flex items-center justify-center group-hover:bg-[#C1121F] group-hover:text-white transition">
-                            {item.icon}
-                          </span>
-
-                          <span>
-                            <span className="block font-black text-sm">
-                              {item.name}
-                            </span>
-                            <span className="block text-xs text-[#6B7280]">
-                              {item.desc}
-                            </span>
-                          </span>
-                        </NavLink>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                <span className="text-[#C1121F]">{dashboardData.icon}</span>
+                {dashboardData.shortName}
+              </NavLink>
+            )}
           </div>
 
           {/* Desktop Buttons */}
-          <div className="hidden md:flex items-center gap-3 shrink-0">
-            <NavLink
-              to="/login"
-              className="group px-5 py-2.5 rounded-2xl border border-[#E5E7EB] bg-white/85 text-[#111827] font-bold hover:text-[#C1121F] hover:bg-[#FEF2F2] hover:border-red-100 transition flex items-center gap-2 shadow-sm"
-            >
-              <FaSignInAlt className="text-[#C1121F] group-hover:scale-110 transition" />
-              Login
-            </NavLink>
+          <div className="hidden shrink-0 items-center gap-3 md:flex">
+            {currentUser ? (
+              <>
+                <button
+                  onClick={handleDashboardClick}
+                  className="group flex items-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white/85 px-5 py-2.5 font-bold text-[#111827] shadow-sm transition hover:border-red-100 hover:bg-[#FEF2F2] hover:text-[#C1121F]"
+                >
+                  <span className="text-[#C1121F] transition group-hover:scale-110">
+                    {dashboardData.icon}
+                  </span>
+                  {dashboardData.name}
+                </button>
 
-            <NavLink
-              to="/register"
-              className="group relative overflow-hidden px-5 py-2.5 rounded-2xl bg-[#C1121F] text-white font-bold shadow-lg shadow-red-200 hover:bg-[#780000] transition flex items-center gap-2"
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                <FaUserPlus />
-                Register
-              </span>
-              <span className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-            </NavLink>
+                <button
+                  onClick={handleLogout}
+                  aria-label="Log out"
+                  className="group relative flex items-center gap-2 overflow-hidden rounded-2xl bg-[#C1121F] px-5 py-2.5 font-bold text-white shadow-lg shadow-red-200 transition hover:bg-[#780000]"
+                >
+                  <span className="relative z-10 flex items-center gap-2">
+                    <FaSignOutAlt />
+                    Logout
+                  </span>
+                  <span className="absolute inset-0 -translate-x-full bg-white/20 transition-transform duration-700 group-hover:translate-x-full" />
+                </button>
+              </>
+            ) : (
+              <>
+                <NavLink
+                  to="/login"
+                  className="group flex items-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white/85 px-5 py-2.5 font-bold text-[#111827] shadow-sm transition hover:border-red-100 hover:bg-[#FEF2F2] hover:text-[#C1121F]"
+                >
+                  <FaSignInAlt className="text-[#C1121F] transition group-hover:scale-110" />
+                  Login
+                </NavLink>
+
+                <NavLink
+                  to="/register"
+                  className="group relative flex items-center gap-2 overflow-hidden rounded-2xl bg-[#C1121F] px-5 py-2.5 font-bold text-white shadow-lg shadow-red-200 transition hover:bg-[#780000]"
+                >
+                  <span className="relative z-10 flex items-center gap-2">
+                    <FaUserPlus />
+                    Register
+                  </span>
+                  <span className="absolute inset-0 -translate-x-full bg-white/20 transition-transform duration-700 group-hover:translate-x-full" />
+                </NavLink>
+              </>
+            )}
           </div>
 
           {/* Mobile Toggle */}
           <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="xl:hidden w-12 h-12 rounded-2xl bg-[#FEF2F2] text-[#C1121F] flex items-center justify-center border border-red-100 shadow-sm"
+            onClick={() => setIsOpen((prev) => !prev)}
+            aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+            className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-100 bg-[#FEF2F2] text-[#C1121F] shadow-sm xl:hidden"
           >
             {isOpen ? <FaTimes /> : <FaBars />}
           </button>
         </div>
       </div>
 
-      {/* Mobile / Tablet Menu */}
+      {/* Mobile Menu */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -270,9 +324,9 @@ function Navbar() {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.28 }}
-            className="xl:hidden overflow-hidden border-t border-[#E5E7EB] bg-[#FCFCFD]/95 backdrop-blur-2xl"
+            className="overflow-hidden border-t border-[#E5E7EB] bg-[#FCFCFD]/95 backdrop-blur-2xl xl:hidden"
           >
-            <div className="px-5 py-5 space-y-3">
+            <div className="space-y-3 px-5 py-5">
               {navLinks.map((link) => (
                 <MobileNavLink
                   key={link.path}
@@ -281,70 +335,85 @@ function Navbar() {
                 />
               ))}
 
-              <div className="pt-4 border-t border-[#E5E7EB]">
-                <p className="px-2 mb-3 text-xs uppercase tracking-wider font-black text-[#C1121F]">
-                  Dashboards
-                </p>
+              {currentUser && (
+                <div className="border-t border-[#E5E7EB] pt-4">
+                  <p className="mb-3 px-2 text-xs font-black uppercase tracking-wider text-[#C1121F]">
+                    Your Dashboard
+                  </p>
 
-                <div className="space-y-3">
-                  {dashboardLinks.map((item) => (
-                    <NavLink
-                      key={item.path}
-                      to={item.path}
-                      onClick={() => setIsOpen(false)}
-                      className={({ isActive }) =>
-                        `group flex items-center gap-3 rounded-2xl px-4 py-3.5 font-bold transition ${
-                          isActive
-                            ? "bg-[#FEF2F2] text-[#C1121F] border border-red-100"
-                            : "text-[#6B7280] hover:bg-[#FEF2F2] hover:text-[#C1121F]"
-                        }`
-                      }
-                    >
-                      <span className="w-10 h-10 rounded-xl bg-white border border-[#E5E7EB] flex items-center justify-center text-[#C1121F]">
-                        {item.icon}
-                      </span>
+                  <button
+                    onClick={handleDashboardClick}
+                    className="group flex w-full items-center gap-3 rounded-2xl border border-red-100 bg-[#FEF2F2] px-4 py-3.5 text-left font-bold text-[#C1121F] transition"
+                  >
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#E5E7EB] bg-white text-[#C1121F]">
+                      {dashboardData.icon}
+                    </span>
 
-                      <span>
-                        <span className="block">{item.name}</span>
-                        <span className="block text-xs text-[#6B7280] font-semibold">
-                          {item.desc}
-                        </span>
+                    <span>
+                      <span className="block">{dashboardData.name}</span>
+                      <span className="block text-xs font-semibold text-[#6B7280]">
+                        {dashboardData.desc}
                       </span>
-                    </NavLink>
-                  ))}
+                    </span>
+                  </button>
                 </div>
-              </div>
+              )}
 
               <div className="grid grid-cols-2 gap-3 pt-4">
-                <NavLink
-                  to="/login"
-                  onClick={() => setIsOpen(false)}
-                  className="px-4 py-3.5 rounded-2xl border border-[#E5E7EB] bg-white text-[#111827] font-black text-center hover:bg-[#FEF2F2] hover:text-[#C1121F] transition"
-                >
-                  Login
-                </NavLink>
+                {currentUser ? (
+                  <>
+                    <button
+                      onClick={handleDashboardClick}
+                      className="rounded-2xl border border-[#E5E7EB] bg-white px-4 py-3.5 text-center font-black text-[#111827] transition hover:bg-[#FEF2F2] hover:text-[#C1121F]"
+                    >
+                      Dashboard
+                    </button>
 
-                <NavLink
-                  to="/register"
-                  onClick={() => setIsOpen(false)}
-                  className="px-4 py-3.5 rounded-2xl bg-[#C1121F] text-white font-black text-center hover:bg-[#780000] transition shadow-lg shadow-red-200"
-                >
-                  Register
-                </NavLink>
+                    <button
+                      onClick={handleLogout}
+                      aria-label="Log out"
+                      className="rounded-2xl bg-[#C1121F] px-4 py-3.5 text-center font-black text-white shadow-lg shadow-red-200 transition hover:bg-[#780000]"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <NavLink
+                      to="/login"
+                      onClick={() => setIsOpen(false)}
+                      className="rounded-2xl border border-[#E5E7EB] bg-white px-4 py-3.5 text-center font-black text-[#111827] transition hover:bg-[#FEF2F2] hover:text-[#C1121F]"
+                    >
+                      Login
+                    </NavLink>
+
+                    <NavLink
+                      to="/register"
+                      onClick={() => setIsOpen(false)}
+                      className="rounded-2xl bg-[#C1121F] px-4 py-3.5 text-center font-black text-white shadow-lg shadow-red-200 transition hover:bg-[#780000]"
+                    >
+                      Register
+                    </NavLink>
+                  </>
+                )}
               </div>
 
-              <div className="mt-4 rounded-3xl bg-gradient-to-br from-[#FEF2F2] via-white to-[#E0F2FE] border border-[#E5E7EB] p-5 shadow-sm">
+              <div className="mt-4 rounded-3xl border border-[#E5E7EB] bg-gradient-to-br from-[#FEF2F2] via-white to-[#E0F2FE] p-5 shadow-sm">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-[#C1121F] text-white flex items-center justify-center shadow-lg shadow-red-200">
-                    <FaHospital />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#C1121F] text-white shadow-lg shadow-red-200">
+                    {currentUser ? dashboardData.icon : <FaTint />}
                   </div>
 
                   <div>
                     <h4 className="font-black text-[#111827]">
-                      BloodLink System
+                      {currentUser
+                        ? `Logged in as ${dashboardData.shortName}`
+                        : "BloodLink System"}
                     </h4>
                     <p className="text-sm text-[#6B7280]">
-                      Faster donor and requester connection.
+                      {currentUser
+                        ? dashboardData.desc
+                        : "Faster donor and requester connection."}
                     </p>
                   </div>
                 </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -87,6 +87,13 @@ const RequesterDashboard = () => {
   const [draftProfile, setDraftProfile] = useState(requesterProfile);
   const [isEditing, setIsEditing] = useState(false);
   const [savedMessage, setSavedMessage] = useState("");
+  const [donors] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("bloodlinkDonors") || "[]");
+    } catch {
+      return [];
+    }
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -357,6 +364,38 @@ const RequesterDashboard = () => {
                     {requesterProfile.notes}
                   </p>
                 </div>
+              </div>
+            </div>
+
+            <div className="relative mt-5 rounded-[1.5rem] border border-[#E5E7EB] bg-[#FCFCFD] p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-black text-[#111827]">Nearby Donors</h4>
+                  <p className="text-xs font-semibold text-[#6B7280]">Available donors matching the current request.</p>
+                </div>
+                <span className="rounded-full bg-[#FEF2F2] px-3 py-1 text-xs font-black text-[#C1121F]">
+                  {donors.length} listed
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                {donors.length > 0 ? (
+                  donors.slice(0, 4).map((donor) => (
+                    <div key={donor.id} className="rounded-2xl border border-[#E5E7EB] bg-white p-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-black text-[#111827]">{donor.name}</p>
+                          <p className="text-xs font-semibold text-[#6B7280]">{donor.bloodGroup} • {donor.location}, {donor.city}</p>
+                        </div>
+                        <span className="rounded-full bg-[#DCFCE7] px-2.5 py-1 text-[10px] font-extrabold text-[#16A34A]">
+                          {donor.availability || "Available"}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm font-semibold text-[#6B7280]">No donor profiles have been added yet.</p>
+                )}
               </div>
             </div>
 

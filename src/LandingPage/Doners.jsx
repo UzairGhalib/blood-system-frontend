@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -445,7 +445,7 @@ const DonorDirectorySection = () => {
               </motion.button>
 
               <MotionLink
-                to="/requesters"
+          to="/blood-requests"
                 whileHover={{ y: -2 }}
                 whileTap={{ scale: 0.97 }}
                 className="relative flex h-12 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-[#C1121F] px-5 text-sm font-bold text-white shadow-lg shadow-[#C1121F]/25 transition before:absolute before:inset-0 before:-translate-x-full before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:transition-transform before:duration-700 hover:bg-[#780000] hover:before:translate-x-full"
@@ -680,7 +680,7 @@ const DonorCard = ({ donor }) => {
         </motion.a>
 
         <MotionLink
-          to="/requesters"
+          to="/blood-requests"
           state={{ donor }}
           whileHover={{ y: -2 }}
           whileTap={{ scale: 0.96 }}

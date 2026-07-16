@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -14,10 +14,8 @@ import {
   FaBell,
   FaAward,
   FaEdit,
-  FaUserShield,
   FaAmbulance,
   FaStethoscope,
-  FaSearch,
   FaSave,
   FaTimes,
   FaUndo,
@@ -25,7 +23,6 @@ import {
   FaHome,
   FaNotesMedical,
   FaCheckCircle,
-  FaIdCard,
   FaLocationArrow,
 } from "react-icons/fa";
 
@@ -56,22 +53,6 @@ const defaultDonorProfile = {
 };
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-
-const availabilityOptions = [
-  "Available",
-  "Busy",
-  "Unavailable",
-  "Emergency Only",
-];
-
-const genderOptions = ["Male", "Female", "Other"];
-
-const medicalStatusOptions = [
-  "Healthy",
-  "Recently Donated",
-  "Temporarily Unavailable",
-  "Needs Review",
-];
 
 const floatingIcons = [
   { icon: FaTint, className: "left-[5%] top-[15%]", delay: 0 },
@@ -108,6 +89,13 @@ const DonorDashboard = () => {
   const [draftProfile, setDraftProfile] = useState(donorProfile);
   const [isEditing, setIsEditing] = useState(false);
   const [savedMessage, setSavedMessage] = useState("");
+  const [bloodRequests] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("bloodlinkRequests") || "[]");
+    } catch {
+      return [];
+    }
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -393,6 +381,42 @@ const DonorDashboard = () => {
                     {donorProfile.notes}
                   </p>
                 </div>
+              </div>
+            </div>
+
+            <div className="relative mt-5 rounded-[1.5rem] border border-[#E5E7EB] bg-[#FCFCFD] p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-black text-[#111827]">Live Blood Requests</h4>
+                  <p className="text-xs font-semibold text-[#6B7280]">Requesters needing your help are listed here.</p>
+                </div>
+                <span className="rounded-full bg-[#FEF2F2] px-3 py-1 text-xs font-black text-[#C1121F]">
+                  {bloodRequests.length} active
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                {bloodRequests.length > 0 ? (
+                  bloodRequests.slice(0, 4).map((request) => (
+                    <div key={request.id} className="rounded-2xl border border-[#E5E7EB] bg-white p-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-black text-[#111827]">{request.requesterName || request.name}</p>
+                          <p className="text-xs font-semibold text-[#6B7280]">{request.bloodGroup} • {request.location || request.hospitalLocation}</p>
+                        </div>
+                        <span className="rounded-full bg-[#FEF2F2] px-2.5 py-1 text-[10px] font-extrabold text-[#C1121F]">
+                          {request.urgency || "Urgent"}
+                        </span>
+                      </div>
+                      <div className="mt-2 flex items-center gap-2 text-xs font-semibold text-[#6B7280]">
+                        <FaHospital className="text-[#C1121F]" />
+                        {request.hospital || request.hospitalLocation || "Hospital info pending"}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm font-semibold text-[#6B7280]">No blood requests yet. New requester requests will appear here.</p>
+                )}
               </div>
             </div>
 
@@ -753,24 +777,6 @@ const TextAreaField = ({
         className="w-full resize-none rounded-2xl border border-[#E5E7EB] bg-[#FCFCFD] px-4 py-3 text-sm font-bold text-[#111827] outline-none transition placeholder:text-[#9CA3AF] focus:border-[#C1121F] focus:bg-white focus:ring-4 focus:ring-[#C1121F]/10"
       />
     </label>
-  );
-};
-
-const ActionCard = ({ icon: Icon, title, text, to }) => {
-  return (
-    <Link
-      to={to}
-      className="group rounded-[1.3rem] border border-[#E5E7EB] bg-[#FCFCFD] p-4 transition hover:border-[#FECACA] hover:bg-[#FEF2F2]"
-    >
-      <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[#C1121F] shadow-sm transition group-hover:bg-[#C1121F] group-hover:text-white">
-        <Icon />
-      </div>
-
-      <h4 className="text-sm font-black text-[#111827]">{title}</h4>
-      <p className="mt-1 text-xs font-semibold leading-5 text-[#6B7280]">
-        {text}
-      </p>
-    </Link>
   );
 };
 

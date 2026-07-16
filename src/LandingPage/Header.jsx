@@ -1,4 +1,3 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { motion } from "framer-motion";
@@ -221,7 +220,8 @@ function HeroSection() {
           </p>
 
           <div className="mt-6 flex flex-col sm:flex-row gap-4">
-            <motion.button
+            <MotionLink
+              to="/register"
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.96 }}
               className="group relative overflow-hidden px-7 py-3.5 rounded-2xl bg-[#C1121F] text-white font-bold shadow-lg shadow-red-200 hover:bg-[#780000] transition flex items-center justify-center gap-3"
@@ -229,7 +229,7 @@ function HeroSection() {
               <span className="relative z-10">Start Blood Request</span>
               <FaArrowRight className="relative z-10 group-hover:translate-x-1 transition" />
               <span className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-            </motion.button>
+            </MotionLink>
 
             <MotionLink
               to="/register"

@@ -1,4 +1,3 @@
-import React from "react";
 import { motion } from "framer-motion";
 import {
   FaTint,
@@ -29,7 +28,7 @@ const actionCards = [
     icon: FaTint,
     title: "Request Blood",
     text: "Urgent help",
-    link: "/requesters",
+    link: "/blood-requests",
     button: "Create Request",
     gradient: "from-[#780000] to-[#C1121F]",
   },
@@ -122,7 +121,7 @@ const BloodLinkCTA = () => {
 
               <div className="mt-7 flex flex-wrap gap-3">
                 <a
-                  href="/requesters"
+                  href="/blood-requests"
                   className="group inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-[#780000] to-[#C1121F] px-6 py-4 text-sm font-black text-white shadow-xl shadow-red-200 transition hover:-translate-y-1"
                 >
                   <FaTint className="text-lg" />

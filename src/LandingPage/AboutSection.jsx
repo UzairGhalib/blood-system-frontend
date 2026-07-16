@@ -1,4 +1,3 @@
-import React from "react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { motion } from "framer-motion";
 import {
@@ -391,7 +390,7 @@ function AboutSection() {
 
               <div className="mt-7 flex flex-col sm:flex-row gap-4">
                 <motion.a
-                  href="#how-it-works"
+                  href="how-it-works"
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.96 }}
                   className="group relative overflow-hidden px-7 py-3.5 rounded-2xl bg-[#C1121F] text-white font-bold shadow-lg shadow-red-200 hover:bg-[#780000] transition flex items-center justify-center gap-3"

@@ -1,4 +1,3 @@
-import React from "react";
 import { motion } from "framer-motion";
 import {
   FaTint,
@@ -172,7 +171,7 @@ const WhyChooseSection = () => {
           </div>
 
           <a
-            href="/requesters"
+            href="/blood-requests"
             className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-black text-[#C1121F] shadow-lg transition hover:scale-105"
           >
             Request

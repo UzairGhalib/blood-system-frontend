@@ -1,10 +1,8 @@
-import React from "react";
 import { motion } from "framer-motion";
 import {
   FaTint,
   FaHeartbeat,
   FaHospital,
-  FaMapMarkerAlt,
   FaBell,
   FaShieldAlt,
   FaDatabase,

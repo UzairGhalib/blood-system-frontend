@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import { motion } from "framer-motion";
 import {
@@ -53,6 +53,7 @@ const LoginPage = () => {
   const [activeRole, setActiveRole] = useState("donor");
   const [showPassword, setShowPassword] = useState(false);
   const [loginSuccess, setLoginSuccess] = useState(false);
+  const navigate = useNavigate();
 
   const formik = useFormik({
     initialValues: {
@@ -82,13 +83,6 @@ const LoginPage = () => {
     onSubmit: (values, actions) => {
       const now = new Date();
 
-      const sessionData = {
-        role: activeRole,
-        email: values.email,
-        loginAt: now.toISOString(),
-        rememberMe: values.rememberMe,
-      };
-
       const loginRecord = {
         id: Date.now(),
         role: activeRole,
@@ -97,12 +91,19 @@ const LoginPage = () => {
         time: now.toLocaleString(),
       };
 
+      const currentUser = {
+        id: Date.now(),
+        role: activeRole,
+        email: values.email,
+        rememberMe: values.rememberMe,
+        loggedInAt: now.toISOString(),
+      };
+
       const submissionRecord = {
         id: Date.now(),
         page: "login",
         role: activeRole,
         email: values.email,
-        password: values.password,
         rememberMe: values.rememberMe,
         submittedAt: now.toISOString(),
         submittedAtLabel: now.toLocaleString(),
@@ -118,7 +119,7 @@ const LoginPage = () => {
       );
       const updatedSubmissions = [submissionRecord, ...oldSubmissions].slice(0, 50);
 
-      localStorage.setItem("bloodlinkAuthUser", JSON.stringify(sessionData));
+      localStorage.setItem("bloodlinkCurrentUser", JSON.stringify(currentUser));
       localStorage.setItem(
         "bloodlinkLoginHistory",
         JSON.stringify(updatedHistory)
@@ -128,12 +129,18 @@ const LoginPage = () => {
         JSON.stringify(updatedSubmissions)
       );
 
+      window.dispatchEvent(new Event("bloodlink-auth-change"));
+
       console.groupCollapsed("BloodLink Login Submission");
       console.table([submissionRecord]);
       console.log("Stored login form data:", submissionRecord);
       console.groupEnd();
 
       setLoginSuccess(true);
+
+      navigate(activeRole === "donor" ? "/donor-dashboard" : "/requester-dashboard", {
+        replace: true,
+      });
 
       actions.setFieldValue("password", "");
       actions.setSubmitting(false);
@@ -379,7 +386,7 @@ const LoginPage = () => {
           </p>
 
           <Link
-            to="/become-donor"
+            to="/register"
             className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white px-5 py-3 text-sm font-black text-[#780000] transition hover:border-[#C1121F] hover:bg-[#FEF2F2]"
           >
             <FaUserPlus />

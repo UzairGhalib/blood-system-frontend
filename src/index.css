@@ -1,1 +1,45 @@
- @import "tailwindcss";
+@import "tailwindcss";
+
+:root {
+  --app-bg: #fcfcfd;
+  --app-text: #111827;
+  --brand-red: #c1121f;
+  --brand-red-soft: #fef2f2;
+  --brand-red-dark: #780000;
+
+  scrollbar-color: var(--brand-red) var(--brand-red-soft);
+  scrollbar-width: thin;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background: var(--app-bg);
+  color: var(--app-text);
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 12px;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track {
+  background: var(--brand-red-soft);
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ef4444 0%, var(--brand-red) 55%, var(--brand-red-dark) 100%);
+  border-radius: 9999px;
+  border: 3px solid var(--brand-red-soft);
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #f87171 0%, var(--brand-red) 55%, #5f0000 100%);
+}

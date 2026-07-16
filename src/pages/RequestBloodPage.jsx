@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -85,10 +85,18 @@ const RequestBloodPage = () => {
       bloodGroup: formData.bloodGroup,
       urgency: formData.urgency,
       phone: formData.phone,
+      hospital: formData.hospitalLocation,
       hospitalLocation: formData.hospitalLocation,
+      location: formData.hospitalLocation || "Swabi",
+      city: "Swabi",
       note: formData.note,
       status: "Pending",
       createdAt: new Date().toISOString(),
+      verified: true,
+      units: 1,
+      neededDate: new Date().toLocaleDateString("en-GB"),
+      whatsapp: formData.phone,
+      responseTime: "New",
     };
 
     const storedRequests = JSON.parse(
