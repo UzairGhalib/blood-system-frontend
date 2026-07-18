@@ -34,7 +34,7 @@ const actionCards = [
     gradient: "from-[#780000] to-[#C1121F]",
   },
   
-  // {
+  {
   // <>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci, suscipit eos illo est doloribus nisi cupiditate voluptate ab voluptatibus autem mollitia esse recusandae
   //  voluptates, deleniti ipsam fugit. Consectetur, minima. Facilis.</>
     icon: FaSearchLocation,
