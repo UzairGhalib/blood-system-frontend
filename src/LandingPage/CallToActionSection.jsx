@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { div } from "framer-motion/client";
 import {
   FaTint,
   FaHeartbeat,
@@ -32,7 +33,10 @@ const actionCards = [
     button: "Create Request",
     gradient: "from-[#780000] to-[#C1121F]",
   },
-  {
+  
+  // {
+  // <>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci, suscipit eos illo est doloribus nisi cupiditate voluptate ab voluptatibus autem mollitia esse recusandae
+  //  voluptates, deleniti ipsam fugit. Consectetur, minima. Facilis.</>
     icon: FaSearchLocation,
     title: "Find Donors",
     text: "Nearby heroes",
